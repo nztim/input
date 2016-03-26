@@ -10,10 +10,10 @@ Define input filtering, validation rules and type casting all in one place, and 
 
 Extend BaseProcessor and override as follows:
 
-  * `protected function defaults()` - returns an array of default values, which will be set if the related key is not present in the input array. 
-  Useful to ensure non-required values are present in the input without presenting an error to the user.
-  E.g. `['field' => '']`
-  * `protected function rules()` - returns an array of Laravel validation rules. This method is abstract and must be implemented.
+  * `protected function rules()` - returns an array of Laravel validation rules. This method is abstract and must be implemented. 
+  * You can be sure that all elements found in the rules array are present in the input and no other elements:
+    * Any input keys not found in the rules array are filtered out, so all valid fields must have a rule, even if it's empty.
+    * The normalization process ensures that all keys in the rules array are present in the input array, set to an empty string if null/not present. 
   * `protected function messages()` - returns an array of associated validation messages.
   * `protected function casts()` - returns an array of validation messages. Valid possibilities are `bool`, `int`, `float`, and a callable. E.g. `['age' => 'int', 'subscribe' => 'bool']`
 

@@ -4,13 +4,6 @@ use NZTim\Input\BaseProcessor;
 
 class TestProcessor extends BaseProcessor
 {
-    protected function defaults() : array
-    {
-        return [
-            'address' => '',
-        ];
-    }
-
     protected function rules() : array
     {
         return [

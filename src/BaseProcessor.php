@@ -19,11 +19,6 @@ abstract class BaseProcessor
         'email.unique' => 'This email address is already registered',
     ];
 
-    protected function defaults() : array
-    {
-        return [];
-    }
-
     abstract protected function rules() : array;
 
     protected function messages() : array
@@ -40,8 +35,7 @@ abstract class BaseProcessor
 
     public function __construct(Request $request)
     {
-        $this->input = $this->filter($request->all());
-        $this->setDefaults();
+        $this->input = $this->normalize($request->all());
     }
 
     public function setInput(string $key, $value)
@@ -98,33 +92,17 @@ abstract class BaseProcessor
     // ------------------------------------------------------------------------
 
     /**
-     * Returns an array containing only the fields specified in the rules array,
-     * removing any unexpected fields
+     * Remove unexpected fields and ensure all fields in rules array are present
      * @param $input
      * @return array
      */
-    protected function filter(array $input) : array
+    protected function normalize(array $input) : array
     {
-        $filtered = [];
+        $normalized = [];
         foreach ($this->rules() as $field => $value) {
-            if (isset($input[$field])) {
-                $filtered[$field] = $input[$field];
-            }
+            $normalized[$field] = $input[$field] ?? '';
         }
-        return $filtered;
-    }
-
-    /**
-     * Any fields not present in the input array will have their values set as specified
-     * @return void
-     */
-    protected function setDefaults()
-    {
-        foreach($this->defaults() as $key => $value) {
-            if(!isset($this->input[$key])) {
-                $this->input[$key] = $value;
-            }
-        }
+        return $normalized;
     }
 
     /**
