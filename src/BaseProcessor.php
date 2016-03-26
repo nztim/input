@@ -79,6 +79,17 @@ abstract class BaseProcessor
         }
     }
 
+    /**
+     * @return ValidatorContract|false
+     */
+    public function getValidation()
+    {
+        if (is_null($this->validation)) {
+            $this->validate();
+        }
+        return $this->validation;
+    }
+
     public function getInput(bool $cast = true) : array
     {
         return $cast ? $this->castInput() : $this->input;
@@ -132,17 +143,6 @@ abstract class BaseProcessor
             $output[$key] = str_replace(',{:id}', $replace, $rule);
         }
         return $output;
-    }
-
-    /**
-     * @return ValidatorContract|false
-     */
-    public function getValidation()
-    {
-        if (is_null($this->validation)) {
-            $this->validate();
-        }
-        return $this->validation;
     }
 
     /**
