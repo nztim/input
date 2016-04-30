@@ -1,5 +1,6 @@
 <?php namespace NZTim\Input\Tests;
 
+use Carbon\Carbon;
 use PHPUnit_Framework_TestCase;
 
 class ProcessorTest extends PHPUnit_Framework_TestCase
@@ -23,6 +24,7 @@ class ProcessorTest extends PHPUnit_Framework_TestCase
             'age'       => '21',
             'pi'        => '3.141',
             'subscribe' => '1',
+            'oneday'    => '1 June 2020',
         ];
     }
 
@@ -54,6 +56,10 @@ class ProcessorTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_float($processor->getInput()['pi']));
         $this->assertTrue(is_int($processor->getInput()['age']));
         $this->assertEquals(strtoupper($this->input()['name']), $processor->getInput()['name']);
+        /** @var Carbon $oneday */
+        $oneday = $processor->getInput()['oneday'];
+        $this->assertInstanceOf(Carbon::class, $oneday);
+        $this->assertTrue($oneday->eq(Carbon::parse($this->input()['oneday'])));
     }
 
     /** @test */

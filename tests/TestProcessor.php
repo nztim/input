@@ -13,6 +13,7 @@ class TestProcessor extends BaseProcessor
             'age'       => 'required|integer',
             'pi'        => 'required',
             'subscribe' => 'required|in:0,1',
+            'oneday'    => '',
         ];
     }
 
@@ -34,6 +35,7 @@ class TestProcessor extends BaseProcessor
             'age'       => 'int',
             'pi'        => 'float',
             'name'      => $upper,
+            'oneday'    => 'carbon',
         ];
     }
 }

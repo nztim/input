@@ -1,5 +1,6 @@
 <?php namespace NZTim\Input;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Validator as LaravelValidator;
@@ -147,6 +148,9 @@ abstract class BaseProcessor
             }
             if ($casts[$key] == 'float') {
                 $output[$key] = floatval($value);
+            }
+            if ($casts[$key] == 'carbon') {
+                $output[$key] = Carbon::parse($value);
             }
             if (!isset($output[$key])) {
                 throw new InvalidArgumentException('$casts array value for '. $key . ' is not valid: ' . $value);
