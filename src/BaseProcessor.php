@@ -75,7 +75,7 @@ abstract class BaseProcessor
     }
 
     /**
-     * @return ValidatorContract|false
+     * @return \Illuminate\Validation\Validator
      */
     public function getValidation()
     {
