@@ -49,6 +49,11 @@ abstract class BaseProcessor
         unset($this->input[$key]);
     }
 
+    public function replaceInput(array $input)
+    {
+        $this->input = $this->normalize($input);
+    }
+
     /**
      * Accepts optional rules and messages arrays, how they are handled depends on $merge parameter
      * $merge determines if the provided rules are merged with or replace the existing rules
