@@ -22,6 +22,7 @@ Then, to handle form input:
 * Inject the Processor class into your controller.
 * The request is used to set the input values.
 * `$processor->setInput()` and `$processor->removeInput()` can directly modify the input array as required.
+    * Can be used to set input values not in the rules() array.
 * `$processor->validate()` returns boolean success/failure. Arguments allow you to override/merge rules/messages as needed.
 * `$processor->getValidation()` returns the validation object, or false if validation was successful.
 * `$processor->getInput()` returns input casted to desired types, use `getInput(false)` to return uncasted input.
