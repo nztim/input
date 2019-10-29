@@ -2,14 +2,16 @@
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use \Illuminate\Validation\Factory;
+use Illuminate\Validation\Validator;
+
 use InvalidArgumentException;
-use Validator as LaravelValidator;
-use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 
 abstract class BaseProcessor
 {
     protected $input;
     protected $validation;
+    protected $laravelValidation;
 
     // Data and overrides -----------------------------------------------------
 
@@ -20,23 +22,24 @@ abstract class BaseProcessor
         'email.unique' => 'This email address is already registered',
     ];
 
-    abstract protected function rules() : array;
+    abstract protected function rules(): array;
 
-    protected function messages() : array
+    protected function messages(): array
     {
         return [];
     }
 
-    protected function casts() : array
+    protected function casts(): array
     {
         return [];
     }
 
     // Public methods ---------------------------------------------------------
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, Factory $laravelValidation)
     {
         $this->input = $this->normalize($request->all());
+        $this->laravelValidation = $laravelValidation;
     }
 
     public function setInput(string $key, $value)
@@ -55,21 +58,18 @@ abstract class BaseProcessor
     }
 
     /**
-     * Accepts optional rules and messages arrays, how they are handled depends on $merge parameter
-     * $merge determines if the provided rules are merged with or replace the existing rules
-     * @param array $rules
-     * @param array $messages
-     * @param bool $merge
-     * @return bool
+     * Accepts optional rules and messages arrays
+     * $merge = true - rules are merged with existing rules
+     * $merge = false - existing rules are ignored
      */
-    public function validate(array $rules = [], array $messages = [], bool $merge = true) : bool
+    public function validate(array $rules = [], array $messages = [], bool $merge = true): bool
     {
         if ($merge) {
             $rules = array_merge($this->rules(), $rules);
             $messages = array_merge($this->defaultMessages, $this->messages(), $messages);
         }
         $rules = $this->uniqueUpdates($rules);
-        $validation = LaravelValidator::make($this->input, $rules, $messages);
+        $validation = $this->laravelValidation->make($this->input, $rules, $messages);
         if ($validation->fails()) {
             $this->validation = $validation;
             return false;
@@ -79,10 +79,7 @@ abstract class BaseProcessor
         }
     }
 
-    /**
-     * @return \Illuminate\Validation\Validator
-     */
-    public function getValidation()
+    public function getValidation(): Validator
     {
         if (is_null($this->validation)) {
             $this->validate();
@@ -90,19 +87,15 @@ abstract class BaseProcessor
         return $this->validation;
     }
 
-    public function getInput(bool $cast = true) : array
+    public function getInput(bool $cast = true): array
     {
         return $cast ? $this->castInput() : $this->input;
     }
 
     // ------------------------------------------------------------------------
 
-    /**
-     * Remove unexpected fields and ensure all fields in rules array are present
-     * @param $input
-     * @return array
-     */
-    protected function normalize(array $input) : array
+    // Remove unexpected fields and ensure all fields in rules array are present
+    protected function normalize(array $input): array
     {
         $normalized = [];
         foreach ($this->rules() as $field => $value) {
@@ -116,10 +109,8 @@ abstract class BaseProcessor
      * Example rule: 'email' => 'required|integer|unique:users,email,{:id}'
      * If $input['id'] is set, i.e. input has an ID, then ',{:id}' is replaced with the ID, e.g. ',123'
      * If $input['id'] is not set then the extra part of the rule ',{:id}' is removed
-     * @param array $rules
-     * @return array
      */
-    protected function uniqueUpdates($rules) : array
+    protected function uniqueUpdates(array $rules): array
     {
         $replace = empty($this->input['id']) ? '' : ',' . $this->input['id'];
         $output = [];
@@ -129,15 +120,11 @@ abstract class BaseProcessor
         return $output;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @return array
-     */
-    protected function castInput() : array
+    protected function castInput(): array
     {
         $output = [];
         $casts = $this->casts();
-        foreach($this->input as $key => $value) {
+        foreach ($this->input as $key => $value) {
             if (!isset($casts[$key])) {
                 $output[$key] = $value;
                 continue;
@@ -158,7 +145,7 @@ abstract class BaseProcessor
                 $output[$key] = Carbon::parse($value);
             }
             if (!isset($output[$key])) {
-                throw new InvalidArgumentException('$casts array value for '. $key . ' is not valid: ' . $value);
+                throw new InvalidArgumentException('$casts array value for ' . $key . ' is not valid: ' . $value);
             }
         }
         return $output;
